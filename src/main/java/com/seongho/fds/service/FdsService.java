@@ -1,59 +1,46 @@
 package com.seongho.fds.service;
 
+import com.seongho.fds.config.FdsProperties;
 import com.seongho.fds.dto.TransactionRequest;
 import com.seongho.fds.dto.TransactionResponse;
 import com.seongho.fds.repository.TrustedReceiverRepository;
 import com.seongho.fds.util.RedisUtil;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import org.hibernate.Transaction;
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-@Setter
-// 탐지 서비스
 public class FdsService {
 
     private final KieContainer kieContainer;
-
     private final RedisUtil redisUtil;
-
     private final TrustedReceiverRepository trustedReceiverRepository;
+    private final FdsProperties fdsProperties;
 
-    public TransactionResponse validateTransaction(TransactionRequest request){
-
-        // 1. 화이트리스트 여부 확인(DB조회)
+    public TransactionResponse validateTransaction(TransactionRequest request) {
+        // 1. 화이트리스트 여부 확인 (DB 조회)
         boolean isTrusted = trustedReceiverRepository.existsBySenderIdAndReceiverId(
-                request.getSenderId(),
-                request.getReceiverId()
-        );
-
-        // 2. 요청 객체에 결과 저장
+                request.getSenderId(), request.getReceiverId());
         request.setTrusted(isTrusted);
 
-        String redisKey = "tx_count:" + request.getSenderId();
-        long count = redisUtil.incrementAndGet(redisKey, 1);
-        TransactionResponse response = new TransactionResponse();
-
-        //요청 객체에 빈도 정보 주입
+        // 2. Redis로 1분 내 송금 횟수 카운팅
+        long count = redisUtil.incrementAndGet("tx_count:" + request.getSenderId(), 1);
         request.setRecentTransactionCount(count);
 
-        // 1. KieSession 생성 (룰 실행을 위한 세션)
+        TransactionResponse response = new TransactionResponse();
         KieSession kieSession = kieContainer.newKieSession();
 
-        try{
-            // 2. 엔진에 데이터 주입 (Global 변수를 활용해 결과값을 담아옴)
+        try {
+            // 3. 룰 임계값을 global로 주입 (application.yml에서 설정)
             kieSession.setGlobal("response", response);
+            kieSession.setGlobal("amountThreshold", fdsProperties.getAmountThreshold());
+            kieSession.setGlobal("frequencyThreshold", fdsProperties.getFrequencyThreshold());
+            kieSession.setGlobal("blacklistedIpPattern", fdsProperties.getBlacklistedIpPattern());
             kieSession.insert(request);
-
-            // 3. 모든 룰 실행
             kieSession.fireAllRules();
-        } finally{
-            // 4. 세션 종료 (메모리 누수 방지 필수)
+        } finally {
             kieSession.dispose();
         }
 

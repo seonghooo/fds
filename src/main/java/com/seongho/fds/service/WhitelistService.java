@@ -14,6 +14,9 @@ public class WhitelistService {
 
     @Transactional
     public void registerWhitelist(WhitelistRequest request){
+        if (trustedReceiverRepository.existsBySenderIdAndReceiverId(request.getSenderId(), request.getReceiverId())) {
+            throw new IllegalArgumentException("이미 화이트리스트에 등록된 수취인입니다.");
+        }
 
         TrustedReceiver receiver = TrustedReceiver.builder()
                 .senderId(request.getSenderId())
