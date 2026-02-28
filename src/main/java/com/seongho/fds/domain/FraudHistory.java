@@ -12,6 +12,10 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(indexes = {
+        @Index(name = "idx_fraud_history_sender_id", columnList = "senderId"),
+        @Index(name = "idx_fraud_history_detected_at", columnList = "detectedAt")
+})
 public class FraudHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

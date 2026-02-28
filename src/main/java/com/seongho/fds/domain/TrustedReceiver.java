@@ -11,7 +11,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-
+@Table(
+        uniqueConstraints = @UniqueConstraint(name = "uq_trusted_receiver", columnNames = {"sender_id", "receiver_id"}),
+        indexes = @Index(name = "idx_trusted_receiver_sender_id", columnList = "sender_id")
+)
 public class TrustedReceiver {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

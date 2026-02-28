@@ -5,10 +5,12 @@ import com.seongho.fds.dto.TransactionRequest;
 import com.seongho.fds.repository.FraudHistoryRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.List; // saveHistory 파라미터에서 사용
 
 @Service
 @RequiredArgsConstructor
@@ -30,9 +32,8 @@ public class FraudHistoryService {
         fraudHistoryRepository.save(history);
     }
 
-    // 관리자가 이상 로그 목록 확인
-    public List<FraudHistory> getAllHistories(){
-        return fraudHistoryRepository.findAll();
-        // 최신순으로 하려면 findAll(Sort.by(Sort.Direction.DESC, "detectedAt"))
+    // 관리자가 이상 로그 목록 확인 (최신순 페이지네이션)
+    public Page<FraudHistory> getHistories(Pageable pageable) {
+        return fraudHistoryRepository.findAll(pageable);
     }
 }
