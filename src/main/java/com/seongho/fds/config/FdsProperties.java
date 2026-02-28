@@ -12,10 +12,10 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "fds.rules")
 public class FdsProperties {
     /** 고액 송금 기준 금액 (KRW) */
-    private long amountThreshold = 10_000_000;
+    private Long amountThreshold = 10_000_000L;
 
     /** 단기 반복 송금 횟수 기준 (1분 이내) */
-    private long frequencyThreshold = 5;
+    private Long frequencyThreshold = 5L;
 
     /** 차단할 송신 IP 패턴 (정규식) */
     private String blacklistedIpPattern = "192\\.168\\.0\\..*";

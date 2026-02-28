@@ -23,11 +23,11 @@ public class FdsService {
         // 1. 화이트리스트 여부 확인 (DB 조회)
         boolean isTrusted = trustedReceiverRepository.existsBySenderIdAndReceiverId(
                 request.getSenderId(), request.getReceiverId());
-        request.setTrusted(isTrusted);
+        request.setTrusted(Boolean.valueOf(isTrusted));
 
         // 2. Redis로 1분 내 송금 횟수 카운팅
         long count = redisUtil.incrementAndGet("tx_count:" + request.getSenderId(), 1);
-        request.setRecentTransactionCount(count);
+        request.setRecentTransactionCount(Long.valueOf(count));
 
         TransactionResponse response = new TransactionResponse();
         KieSession kieSession = kieContainer.newKieSession();
