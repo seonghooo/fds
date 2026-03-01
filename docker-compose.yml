@@ -1,9 +1,12 @@
-version: '3'
 services:
+
+  # ── Zookeeper (Kafka 의존성) ─────────────────────────────
   zookeeper:
     image: wurstmeister/zookeeper
     ports:
       - "2181:2181"
+
+  # ── Kafka ────────────────────────────────────────────────
   kafka:
     image: wurstmeister/kafka
     ports:
@@ -11,3 +14,26 @@ services:
     environment:
       KAFKA_ADVERTISED_HOST_NAME: localhost
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    depends_on:
+      - zookeeper
+
+  # ── MySQL ────────────────────────────────────────────────
+  mysql:
+    image: mysql:8.0
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: fds
+      TZ: Asia/Seoul
+    volumes:
+      - mysql-data:/var/lib/mysql   # 컨테이너 재시작해도 데이터 유지
+
+  # ── Redis ────────────────────────────────────────────────
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+volumes:
+  mysql-data:   # MySQL 데이터 영속성 보장

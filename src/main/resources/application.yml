@@ -15,12 +15,6 @@ spring:
 
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
-
-fds:
-  rules:
-    amount-threshold: 10000000        # 고액 송금 기준 (KRW)
-    frequency-threshold: 5            # 1분 내 반복 횟수 기준
-    blacklisted-ip-pattern: "192\\.168\\.0\\..*"  # 차단 IP 패턴 (정규식)
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -30,3 +24,13 @@ fds:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
         spring.json.trusted.packages: "com.seongho.fds.dto"
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: 86400000   # 24시간 (ms)
+
+fds:
+  rules:
+    amount-threshold: 10000000        # 고액 송금 기준 (KRW)
+    frequency-threshold: 5            # 1분 내 반복 횟수 기준
+    blacklisted-ip-pattern: "192\\.168\\.0\\..*"  # 차단 IP 패턴 (정규식)

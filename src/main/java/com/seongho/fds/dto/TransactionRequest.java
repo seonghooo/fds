@@ -32,8 +32,10 @@ public class TransactionRequest {
     @NotNull
     private LocalDateTime timestamp;    //거래 발생 시간 ("1 내 5번 송금" 같은 빈도 기반 룰을 만들 때 기준점이 됌)
 
+    @JsonIgnore
     private Long recentTransactionCount;        //최근 1분간 거래 횟수 (Redis에서 조회 예정)
 
+    @JsonIgnore
     private Boolean trusted;              // Drools 룰 엔진이 이 거래가 안전한 거래인지 판단
 
 
