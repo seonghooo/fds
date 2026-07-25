@@ -1,9 +1,9 @@
 package rules;
 
-import com.seongho.fds.dto.TransactionRequest;
-import com.seongho.fds.dto.TransactionResponse;
+import com.seongho.fds.transaction.dto.TransactionRequest;
+import com.seongho.fds.transaction.dto.TransactionResponse;
 
-global com.seongho.fds.dto.TransactionResponse response;
+global com.seongho.fds.transaction.dto.TransactionResponse response;
 global Long amountThreshold;
 global Long frequencyThreshold;
 global String blacklistedIpPattern;

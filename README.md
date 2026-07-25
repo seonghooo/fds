@@ -318,50 +318,46 @@ fraud_history                                 (차단된 거래 이력)
 fds/
 ├── src/main/java/com/seongho/fds/
 │   ├── FdsApplication.java
-│   ├── config/
-│   │   ├── SecurityConfig.java          # Spring Security + JWT 필터 설정
-│   │   ├── JwtAuthenticationFilter.java # 요청마다 JWT 검증
-│   │   ├── DroolsConfig.java            # KieContainer 빌드
-│   │   ├── KafkaRetryConfig.java        # Retry Topic + DLQ 설정
-│   │   ├── FdsProperties.java           # application.yml 룰 임계값 바인딩
-│   │   └── SwaggerConfig.java           # OpenAPI / Swagger 설정
-│   ├── controller/
-│   │   ├── AuthController.java          # 회원가입 / 로그인 / 로그아웃
-│   │   ├── FdsController.java           # 거래 탐지 + 내 이력 조회
-│   │   ├── FraudHistoryController.java  # 전체 이력 조회 (ADMIN)
-│   │   └── WhitelistController.java     # 화이트리스트 CRUD (ADMIN)
-│   ├── service/
-│   │   ├── FdsService.java              # 핵심 탐지 로직 (Redis 조회 → Drools 실행)
-│   │   ├── AuthService.java             # 인증 비즈니스 로직
-│   │   ├── FraudHistoryService.java     # 이상 거래 이력 저장/조회
-│   │   └── WhitelistService.java        # 화이트리스트 관리
-│   ├── producer/
-│   │   └── TransactionProducer.java     # Kafka 이벤트 발행
-│   ├── consumer/
-│   │   ├── TransactionConsumer.java     # BLOCKED 거래 DB 저장
-│   │   └── TransactionDlqConsumer.java  # DLQ 메시지 처리 (로깅/알림)
-│   ├── domain/                          # JPA 엔티티 (User, FraudHistory, TrustedReceiver)
-│   ├── dto/                             # 요청/응답 DTO
-│   ├── repository/                      # Spring Data JPA Repository
-│   ├── util/
-│   │   ├── RedisUtil.java               # Redis 카운팅 / Set / 평균 관리
-│   │   └── JwtUtil.java                 # JWT 생성 / 검증 / 만료 조회
-│   └── exception/
-│       ├── GlobalExceptionHandler.java  # 전역 예외 처리 (@RestControllerAdvice)
-│       ├── AuthenticationFailedException.java
-│       └── DuplicateResourceException.java
+│   ├── auth/                            # 회원가입, 로그인, 사용자와 권한
+│   │   ├── controller/
+│   │   ├── service/
+│   │   ├── dto/
+│   │   ├── domain/
+│   │   └── repository/
+│   ├── transaction/                     # 실시간 거래 탐지와 Kafka 이벤트
+│   │   ├── controller/
+│   │   ├── service/
+│   │   ├── dto/
+│   │   ├── producer/
+│   │   └── consumer/
+│   ├── fraudhistory/                    # 차단 거래 이력 저장과 조회
+│   │   ├── controller/
+│   │   ├── service/
+│   │   ├── domain/
+│   │   └── repository/
+│   ├── whitelist/                       # 신뢰 수취인 관리
+│   │   ├── controller/
+│   │   ├── service/
+│   │   ├── dto/
+│   │   ├── domain/
+│   │   └── repository/
+│   └── global/                          # 여러 기능에서 공유하는 인프라
+│       ├── config/                      # Drools, Kafka, Swagger, 환경 설정
+│       ├── security/                    # Spring Security와 JWT
+│       ├── redis/                       # Redis 공통 연산
+│       └── exception/                   # 전역 예외 처리
 ├── src/main/resources/
 │   ├── application.yml                  # 서버 설정 + 룰 임계값
 │   └── rules/
 │       └── transfer-rules.drl           # Drools 탐지 룰 정의 (6개)
 ├── src/test/java/com/seongho/fds/
-│   ├── service/FdsServiceTest.java      # 룰 엔진 6개 룰 검증 (실제 Drools 로드)
-│   ├── service/AuthServiceTest.java     # 회원가입 / 로그인 / 로그아웃
-│   ├── service/FraudHistoryServiceTest.java
-│   ├── service/WhitelistServiceTest.java
-│   ├── consumer/TransactionConsumerTest.java
-│   ├── producer/TransactionProducerTest.java
-│   └── util/RedisUtilTest.java
+│   ├── auth/service/
+│   ├── transaction/service/             # 룰 엔진 6개 룰 검증
+│   ├── transaction/consumer/
+│   ├── transaction/producer/
+│   ├── fraudhistory/service/
+│   ├── whitelist/service/
+│   └── global/redis/
 ├── docker-compose.yml                   # Zookeeper, Kafka, MySQL, Redis
 ├── .env                                 # 환경 변수 (DB / Kafka / JWT)
 ├── .env.example                         # 환경 변수 템플릿
