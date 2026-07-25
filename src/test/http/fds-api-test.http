@@ -1,20 +1,16 @@
-### ============================================================
-###  FDS API 테스트 파일 (IntelliJ HTTP Client)
-###  사용법: 각 요청 왼쪽의 ▶ 버튼 클릭
-### ============================================================
+### FDS API 테스트 (IntelliJ HTTP Client)
+### 순서대로 실행하세요. STEP 2에서 받은 토큰을 변수에 붙여넣어야 이후 요청이 동작합니다.
 
-### ── 공통 변수 설정 ──────────────────────────────────────────
 @baseUrl    = http://localhost:8080/api/v1
-@userToken  = 여기에_로그인_후_받은_USER_토큰_붙여넣기
-@adminToken = 여기에_로그인_후_받은_ADMIN_토큰_붙여넣기
+@userToken  = eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJ0ZXN0MSIsInJvbGUiOiJVU0VSIiwiaWF0IjoxNzcyNjkyNjk2LCJleHAiOjE3NzI3NzkwOTZ9.5ySMMzdNwydkhGlXWdkHdz5bLS4euzvfBfmoM1p52rOp78yQn9WancnVmzNMkC1K
+@adminToken = eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJhZG1pbjIiLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3NzI2OTMyMTEsImV4cCI6MTc3Mjc3OTYxMX0.oCG-61awqMAbwoVfuoS7DobrIfI6pTxhgztg6ExAaoAQt4-V_lDxsn-0Lwfi-RQa
 
-###
-### ══════════════════════════════════════════════════════════════
-### [STEP 1] 회원가입 — 토큰 불필요 (누구나 가능)
-### ══════════════════════════════════════════════════════════════
-###
 
-### ① 일반 USER 회원가입 → 기대 응답: 200 "회원가입 완료!"
+### ====================================================
+### STEP 1. 회원가입 (인증 불필요)
+### ====================================================
+
+# 정상 가입 → 200
 POST {{baseUrl}}/auth/signup
 Content-Type: application/json
 
@@ -25,7 +21,7 @@ Content-Type: application/json
 
 ###
 
-### ② 동일 username으로 재가입 시도 → 기대 응답: 409 Conflict
+# 중복 username 재가입 → 409
 POST {{baseUrl}}/auth/signup
 Content-Type: application/json
 
@@ -36,7 +32,7 @@ Content-Type: application/json
 
 ###
 
-### ③ username 빈값으로 가입 → 기대 응답: 400 Bad Request
+# username 빈값 → 400
 POST {{baseUrl}}/auth/signup
 Content-Type: application/json
 
@@ -45,14 +41,13 @@ Content-Type: application/json
   "password": "pass1234"
 }
 
-###
-### ══════════════════════════════════════════════════════════════
-### [STEP 2] 로그인 — 토큰 발급
-### ══════════════════════════════════════════════════════════════
-###
 
-### ④ USER 로그인 → 기대 응답: 200 + { "token": "eyJ..." }
-###    ★ 응답의 token 값을 복사해서 위의 @userToken에 붙여넣기
+### ====================================================
+### STEP 2. 로그인 → 토큰 발급
+### 응답의 "token" 값을 복사해서 위 @userToken / @adminToken 에 붙여넣으세요
+### ====================================================
+
+# USER 로그인 → 200 + { "token": "eyJ..." }
 POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
@@ -63,7 +58,7 @@ Content-Type: application/json
 
 ###
 
-### ⑤ 잘못된 비밀번호 로그인 → 기대 응답: 409 "사용자명 또는 비밀번호가 올바르지 않습니다."
+# 비밀번호 오류 → 409
 POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
@@ -72,13 +67,12 @@ Content-Type: application/json
   "password": "wrongPassword"
 }
 
-###
-### ══════════════════════════════════════════════════════════════
-### [STEP 3] 이상거래 탐지 — USER or ADMIN 토큰 필요
-### ══════════════════════════════════════════════════════════════
-###
 
-### ⑥ 정상 소액 송금 → 기대 응답: 200 APPROVED
+### ====================================================
+### STEP 3. 이상거래 탐지 (USER or ADMIN 토큰 필요)
+### ====================================================
+
+# 정상 소액 송금 → APPROVED
 POST {{baseUrl}}/transfer/check
 Content-Type: application/json
 Authorization: Bearer {{userToken}}
@@ -93,7 +87,7 @@ Authorization: Bearer {{userToken}}
 
 ###
 
-### ⑦ 고액 송금 (1000만원 이상) → 기대 응답: 200 BLOCKED
+# 고액 송금 (1000만원 이상) → BLOCKED
 POST {{baseUrl}}/transfer/check
 Content-Type: application/json
 Authorization: Bearer {{userToken}}
@@ -108,7 +102,7 @@ Authorization: Bearer {{userToken}}
 
 ###
 
-### ⑧ 차단 IP에서 송금 → 기대 응답: 200 BLOCKED
+# 차단 IP (192.168.0.x) → BLOCKED
 POST {{baseUrl}}/transfer/check
 Content-Type: application/json
 Authorization: Bearer {{userToken}}
@@ -123,7 +117,7 @@ Authorization: Bearer {{userToken}}
 
 ###
 
-### ⑨ 고액 + 차단IP 동시 → 기대 응답: 200 BLOCKED (reasons 2개)
+# 고액 + 차단 IP 동시 → BLOCKED (reasons 2개)
 POST {{baseUrl}}/transfer/check
 Content-Type: application/json
 Authorization: Bearer {{userToken}}
@@ -138,7 +132,7 @@ Authorization: Bearer {{userToken}}
 
 ###
 
-### ⑩ 토큰 없이 요청 → 기대 응답: 403 Forbidden
+# 토큰 없이 요청 → 403
 POST {{baseUrl}}/transfer/check
 Content-Type: application/json
 
@@ -152,7 +146,7 @@ Content-Type: application/json
 
 ###
 
-### ⑪ 위조 토큰으로 요청 → 기대 응답: 403 Forbidden
+# 위조 토큰으로 요청 → 403
 POST {{baseUrl}}/transfer/check
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.fake.token
@@ -165,13 +159,12 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.fake.token
   "timestamp": "2026-03-01T12:00:00"
 }
 
-###
-### ══════════════════════════════════════════════════════════════
-### [STEP 4] 화이트리스트 — ADMIN 토큰만 가능
-### ══════════════════════════════════════════════════════════════
-###
 
-### ⑫ USER 토큰으로 화이트리스트 등록 → 기대 응답: 403 Forbidden
+### ====================================================
+### STEP 4. 화이트리스트 관리 (ADMIN 토큰만 가능)
+### ====================================================
+
+# USER 토큰으로 등록 시도 → 403
 POST {{baseUrl}}/whitelist
 Content-Type: application/json
 Authorization: Bearer {{userToken}}
@@ -183,7 +176,7 @@ Authorization: Bearer {{userToken}}
 
 ###
 
-### ⑬ ADMIN 토큰으로 화이트리스트 등록 → 기대 응답: 200 "화이트리스트 등록 완료!"
+# ADMIN 토큰으로 등록 → 200
 POST {{baseUrl}}/whitelist
 Content-Type: application/json
 Authorization: Bearer {{adminToken}}
@@ -195,7 +188,7 @@ Authorization: Bearer {{adminToken}}
 
 ###
 
-### ⑭ 화이트리스트 등록된 user1→user2 고액 송금 → 기대 응답: 200 APPROVED (화이트리스트이므로 룰 무시)
+# 화이트리스트 등록된 user1→user2 고액+차단IP 송금 → APPROVED (룰 무시)
 POST {{baseUrl}}/transfer/check
 Content-Type: application/json
 Authorization: Bearer {{userToken}}
@@ -208,36 +201,34 @@ Authorization: Bearer {{userToken}}
   "timestamp": "2026-03-01T12:00:00"
 }
 
-###
-### ══════════════════════════════════════════════════════════════
-### [STEP 5] 이상탐지 내역 조회 — ADMIN 토큰만 가능
-### ══════════════════════════════════════════════════════════════
-###
 
-### ⑮ USER 토큰으로 이상탐지 내역 조회 → 기대 응답: 403 Forbidden
+### ====================================================
+### STEP 5. 이상탐지 내역 조회 (ADMIN 토큰만 가능)
+### ====================================================
+
+# USER 토큰으로 조회 → 403
 GET {{baseUrl}}/admin/fraud-history
 Authorization: Bearer {{userToken}}
 
 ###
 
-### ⑯ ADMIN 토큰으로 이상탐지 내역 조회 → 기대 응답: 200 Page<FraudHistory>
+# ADMIN 토큰으로 조회 → 200 (첫 페이지, 기본 크기)
 GET {{baseUrl}}/admin/fraud-history
 Authorization: Bearer {{adminToken}}
 
 ###
 
-### ⑰ 페이지네이션 조회 (2페이지, 5개씩)
+# 페이지네이션: 2페이지, 5개씩
 GET {{baseUrl}}/admin/fraud-history?page=1&size=5
 Authorization: Bearer {{adminToken}}
 
-###
-### ══════════════════════════════════════════════════════════════
-### [STEP 6] ADMIN 계정 생성 — ADMIN 토큰만 가능
-### ══════════════════════════════════════════════════════════════
-###
 
-### ⑱ ADMIN 계정 생성 → 기대 응답: 200 "ADMIN 계정 생성 완료!"
-###    (최초 admin은 DB에 직접 삽입 후, 그 토큰을 @adminToken에 넣어야 함)
+### ====================================================
+### STEP 6. ADMIN 계정 생성 (ADMIN 토큰만 가능)
+### 주의: 최초 admin 계정은 DB에 직접 삽입 후 로그인해서 @adminToken 을 먼저 채워야 합니다
+### ====================================================
+
+# 새 ADMIN 계정 생성 → 200
 POST {{baseUrl}}/admin/users
 Content-Type: application/json
 Authorization: Bearer {{adminToken}}

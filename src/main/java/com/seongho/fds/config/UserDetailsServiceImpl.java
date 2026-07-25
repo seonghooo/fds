@@ -11,9 +11,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+//Spring Security 사용자 로더 : Spring Security가 "이 username"의 사용자 정보를 DB에서 가져와라"라고 요청할 때 응답하는 클래스
 @Service
 @RequiredArgsConstructor
-//Spring Security 사용자 로더 : Spring Security가 "이 username"의 사용자 정보를 DB에서 가져와라"라고 요청할 때 응답하는 클래스
 public class UserDetailsServiceImpl implements UserDetailsService {
 
     private final UserRepository userRepository;

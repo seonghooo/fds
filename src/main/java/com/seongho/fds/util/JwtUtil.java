@@ -56,6 +56,10 @@ public class JwtUtil {
         }
     }
 
+    public long getExpirationTime(String token) {
+        return parseClaims(token).getExpiration().getTime();
+    }
+
     // 토큰 디코딩 (private)
     private Claims parseClaims(String token) {
         return Jwts.parser()

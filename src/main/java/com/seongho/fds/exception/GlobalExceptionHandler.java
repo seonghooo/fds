@@ -1,5 +1,7 @@
 package com.seongho.fds.exception;
 
+import com.seongho.fds.exception.AuthenticationFailedException;
+import com.seongho.fds.exception.DuplicateResourceException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,10 +25,21 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(errors);
     }
 
-    // 중복 등록 등 잘못된 요청
+    @ExceptionHandler(AuthenticationFailedException.class)
+    public ResponseEntity<Map<String, String>> handleAuthFailed(AuthenticationFailedException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("error", ex.getMessage()));
+    }
+
+    @ExceptionHandler(DuplicateResourceException.class)
+    public ResponseEntity<Map<String, String>> handleDuplicate(DuplicateResourceException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Map.of("error", ex.getMessage()));
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, String>> handleIllegalArgument(IllegalArgumentException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT)
+        return ResponseEntity.badRequest()
                 .body(Map.of("error", ex.getMessage()));
     }
 

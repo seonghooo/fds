@@ -7,6 +7,9 @@ global com.seongho.fds.dto.TransactionResponse response;
 global Long amountThreshold;
 global Long frequencyThreshold;
 global String blacklistedIpPattern;
+global Long nightAmountThreshold;
+global Long distributedReceiverThreshold;
+global Long avgAmountMultiplier;
 
 // 룰 1 : 고액 송금 감지 (임계값은 application.yml의 fds.rules.amount-threshold)
 rule "High Amount Transfer Detection"
@@ -30,4 +33,37 @@ rule "High Frequency Transfer Detection"
         $tx : TransactionRequest(trusted == false, recentTransactionCount >= frequencyThreshold)
     then
         response.addReason("단기간 반복 송금 감지 (1분 내 " + frequencyThreshold + "회 이상)");
+end
+
+// 룰 4 : 새벽 시간대 고액 송금 감지 (새벽 1~5시, 임계값은 fds.rules.night-amount-threshold)
+rule "Night Time High Amount Detection"
+    when
+        $tx : TransactionRequest(
+            trusted == false,
+            timestamp.getHour() >= 1,
+            timestamp.getHour() <= 5,
+            amount >= nightAmountThreshold
+        )
+    then
+        response.addReason("새벽 시간대 고액 송금 감지 (새벽 1~5시, " + nightAmountThreshold / 10000 + "만원 이상)");
+end
+
+// 룰 5 : 단기 분산 송금 감지 (1분 내 여러 수신자에게 소액 반복 — 보이스피싱 패턴)
+rule "Distributed Transfer Detection"
+    when
+        $tx : TransactionRequest(trusted == false, recentUniqueReceiverCount >= distributedReceiverThreshold)
+    then
+        response.addReason("단기 분산 송금 감지 (1분 내 " + distributedReceiverThreshold + "명 이상 수신자)");
+end
+
+// 룰 6 : 평소 대비 이상 금액 감지 (과거 평균의 N배 이상, 최소 5건 이상 데이터가 있을 때만 적용)
+rule "Abnormal Amount Detection"
+    when
+        $tx : TransactionRequest(
+            trusted == false,
+            userAvgAmount > 0,
+            amount >= userAvgAmount * avgAmountMultiplier
+        )
+    then
+        response.addReason("평소 대비 이상 금액 감지 (평균 " + $tx.getUserAvgAmount() / 10000 + "만원 대비 " + avgAmountMultiplier + "배 이상)");
 end

@@ -9,8 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.util.List; // saveHistory 파라미터에서 사용
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -26,14 +25,17 @@ public class FraudHistoryService {
                 .amount(request.getAmount())
                 // reasons가 null일 경우 대비해 안전하게 처리
                 .detectedRules(reasons != null ? String.join(", ", reasons) : "None")
-                .detectedAt(LocalDateTime.now())
+                .detectedAt(request.getTimestamp())
                 .build();
 
         fraudHistoryRepository.save(history);
     }
 
-    // 관리자가 이상 로그 목록 확인 (최신순 페이지네이션)
     public Page<FraudHistory> getHistories(Pageable pageable) {
         return fraudHistoryRepository.findAll(pageable);
+    }
+
+    public Page<FraudHistory> getMyHistories(String senderId, Pageable pageable) {
+        return fraudHistoryRepository.findBySenderIdOrderByDetectedAtDesc(senderId, pageable);
     }
 }

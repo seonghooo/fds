@@ -10,6 +10,7 @@ import org.springframework.core.env.MapPropertySource;
 import java.util.HashMap;
 import java.util.Map;
 
+// .env 파일의 환경변수를 Spring 환경에 주입
 public class DotenvEnvironmentPostProcessor implements EnvironmentPostProcessor {
 
     @Override

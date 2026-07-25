@@ -22,6 +22,8 @@ spring:
       group-id: fds-group
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      enable-auto-commit: false
+      auto-offset-reset: earliest
       properties:
         spring.json.trusted.packages: "com.seongho.fds.dto"
 
@@ -29,8 +31,18 @@ jwt:
   secret: ${JWT_SECRET}
   expiration: 86400000   # 24시간 (ms)
 
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+  api-docs:
+    path: /v3/api-docs
+
 fds:
   rules:
     amount-threshold: 10000000        # 고액 송금 기준 (KRW)
     frequency-threshold: 5            # 1분 내 반복 횟수 기준
     blacklisted-ip-pattern: "192\\.168\\.0\\..*"  # 차단 IP 패턴 (정규식)
+    night-amount-threshold: 1000000   # 새벽(1~5시) 고액 송금 기준 (KRW)
+    distributed-receiver-threshold: 3 # 1분 내 고유 수신자 수 기준
+    avg-amount-multiplier: 5          # 평균 대비 이상 금액 배수 기준
