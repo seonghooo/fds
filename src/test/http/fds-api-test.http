@@ -2,8 +2,8 @@
 ### 순서대로 실행하세요. STEP 2에서 받은 토큰을 변수에 붙여넣어야 이후 요청이 동작합니다.
 
 @baseUrl    = http://localhost:8080/api/v1
-@userToken  = eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJ0ZXN0MSIsInJvbGUiOiJVU0VSIiwiaWF0IjoxNzcyNjkyNjk2LCJleHAiOjE3NzI3NzkwOTZ9.5ySMMzdNwydkhGlXWdkHdz5bLS4euzvfBfmoM1p52rOp78yQn9WancnVmzNMkC1K
-@adminToken = eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJhZG1pbjIiLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3NzI2OTMyMTEsImV4cCI6MTc3Mjc3OTYxMX0.oCG-61awqMAbwoVfuoS7DobrIfI6pTxhgztg6ExAaoAQt4-V_lDxsn-0Lwfi-RQa
+@userToken  =
+@adminToken =
 
 
 ### ====================================================
